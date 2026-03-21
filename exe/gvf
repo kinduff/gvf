@@ -1,0 +1,53 @@
+#!/usr/bin/env ruby
+
+require "optparse"
+require_relative "../lib/gvf"
+
+options = { constraint: "minor", yes: false }
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: gvf [options] [Gemfile [Gemfile.lock]]"
+
+  opts.on("-c", "--version-constraint CONSTRAINT", %w[minor patch],
+          "Version constraint ('minor' or 'patch') (default: minor)") do |c|
+    options[:constraint] = c
+  end
+
+  opts.on("-y", "--yes", "Skip confirmation prompt") do
+    options[:yes] = true
+  end
+
+  opts.on("-v", "--version", "Print version and exit") do
+    puts GVF::VERSION
+    exit
+  end
+
+  opts.on("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end
+
+parser.parse!
+
+gemfile  = ARGV[0] || "Gemfile"
+lockfile = ARGV[1] || "Gemfile.lock"
+
+puts "pinning gem versions from:"
+puts "  #{lockfile} -> #{gemfile}"
+
+unless options.delete(:yes)
+  print "\ncontinue? [y/N] "
+  unless $stdin.gets.to_s.strip.downcase == "y"
+    puts "aborted"
+    exit 1
+  end
+end
+
+begin
+  count = GVF.run(gemfile_path: gemfile, lockfile_path: lockfile, **options)
+  puts "updated #{count} gem(s)"
+rescue => e
+  warn "error: #{e.message}"
+  exit 1
+end
