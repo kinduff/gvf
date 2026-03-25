@@ -26,7 +26,7 @@ Options:
 
 You go from this:
 
-```
+```ruby
 source "https://gem.coop"
 
 gem "rails", "~> 8.1.2"
@@ -41,7 +41,7 @@ gem "stimulus-rails"
 
 To this:
 
-```
+```ruby
 source "https://gem.coop"
 
 gem "rails", "~> 8.1"
